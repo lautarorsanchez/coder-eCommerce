@@ -1,5 +1,14 @@
-// Lista de productos
+/*
+Buenas! Lo que me faltaría en cuanto a funcionalidad para pulir y que no tenga errores es que cuando quito los productos del carrito, 
+el boton de agregar en las tarjetas vuelva a habilitarse para poder agregarlo sin recargar la página. 
+Además, cuando actualizo la página los botones de las tarjetas si vuelven a habilitarse, 
+permitiendo que haya productos duplicados, me gustaría que cuando se actualice la página y los productos todavía están en el carrito, 
+el botón de ese producto siga deshabilitado.
+*/
 
+
+
+// Lista de productos (esto me gustaria moverlo a otro archivo pero no me funcionó el import que mostraste en el after)
 const products = [
     {
         id: 1,
@@ -38,7 +47,7 @@ const products = [
     }
 ]
 
-// funcion que itera dentro del array de productos y los muestra en el dom
+// Funcion que itera dentro del array de productos y los muestra en el dom
 
 const mostrarProductos = () => {
     let container = document.querySelector('#container')    
@@ -94,13 +103,9 @@ if(obtenerCarrito) {
 
 
 
-// Carrito
-
+// FUNCIONES DEL CARRITO //
+// Agregar Productos
 const botones = document.querySelectorAll(".buttonto")
-
-//const contadorCarrito = document.querySelector("#contador")
-
-//funcion para agregar productos al carrito
 
 for (const boton of botones) {
     boton.addEventListener("click", agregarProducto)
@@ -111,7 +116,7 @@ for (const boton of botones) {
 
     e.preventDefault()
 
-    e.target.innerHTML = "Agregado" // cambiar esto por funcion para eliminar del carrito
+    e.target.innerHTML = "Agregado" 
     // e.target.setAttribute("disabled", true) 
     let productoClickeado = products.find((item) => item.id == e.target.id) 
     carrito.push(productoClickeado)
@@ -120,20 +125,46 @@ for (const boton of botones) {
   actualizarCarrito(carritoLocal)
   actualizarBotones(carritoLocal)
   
-// eliminar producto  
+// Eliminar productos 
   let botonesBorrar = document.querySelectorAll(".borrar")
   for (const borrar of botonesBorrar) {
     borrar.addEventListener("click", eliminarProducto)
   }
-  totalCarrito()
-  // actualizarBotones()
+  
 }
 
-// funcion  de actualizar carrito al hacer agregar producto
+const botonesBorrar = document.querySelectorAll(".borrar")
+for (const borrar of botonesBorrar) {
+  borrar.addEventListener("click", eliminarProducto)
+}
+
+function eliminarProducto(e) {
+  let productoEliminar = carrito.find((item) => item.id == e.target.id)
+  indiceDeProducto = carrito.indexOf(productoEliminar)
+  
+  carrito.splice(indiceDeProducto, 1)
+  localStorage.setItem("Carrito", JSON.stringify(carrito))
+  let carritoLocal = JSON.parse(localStorage.getItem("Carrito"))  
+  actualizarCarrito(carritoLocal);
+  
+  let botonesBorrar = document.querySelectorAll(".borrar")
+  for (const borrar of botonesBorrar) {
+    borrar.removeEventListener("click", eliminarProducto)
+    borrar.addEventListener("click", eliminarProducto)
+    
+    
+  } 
+  
+  totalCarrito()
+  actualizarBotones()
+
+   
+}
+// Imprime los productos en una tabla
 
 function actualizarCarrito(local){
     
-    let cartContainer = document.querySelector("#carrito");
+    let cartContainer = document.querySelector("#carrito")
     cartContainer.innerHTML = "" 
 
     for (const carritu of local) {
@@ -152,38 +183,11 @@ function actualizarCarrito(local){
 
 }
 
-// borrar productos del carrito 
-
-const botonesBorrar = document.querySelectorAll(".borrar")
-  for (const borrar of botonesBorrar) {
-    borrar.addEventListener("click", eliminarProducto)
-  }
-
-function eliminarProducto(e) {
-    let productoEliminar = carrito.find((item) => item.id == e.target.id)
-    indiceDeProducto = carrito.indexOf(productoEliminar); ///indexOf devuelve el indice del elemento en el array.
-
-    carrito.splice(indiceDeProducto, 1); // splice() elimina elementos, requiere dos parametros. El primero es el indice, y el segundo la cantidad de elemetos que queres eliminar.
-    localStorage.setItem("Carrito", JSON.stringify(carrito)); // Actualizamos el local.
-    let carritoLocal = JSON.parse(localStorage.getItem("Carrito"))  
-    actualizarCarrito(carritoLocal);
-
-    let botonesBorrar = document.querySelectorAll(".borrar")
-  for (const borrar of botonesBorrar) {
-    borrar.removeEventListener("click", eliminarProducto)
-    borrar.addEventListener("click", eliminarProducto)
-
-    
-  } 
-
-  totalCarrito()
-   
-}
 
 
 
   
-// funcion que actualiza los botones
+// Funcion que actualiza los botones (aca es donde estoy casi seguro que está el problema explicado arriba de todo)
 
 function actualizarBotones(local) {
     for (const item of local) {
@@ -191,9 +195,7 @@ function actualizarBotones(local) {
         if (item.id == btn.id) {
           let botonAdd = document.getElementById(`${item.id}`)
           botonAdd.setAttribute("disabled", true)
-          // Desactivo el Boton.
-          botonAdd.innerHTML = "Agregado"; // Cambio el Texto
-          botonAdd.style.minWidth = "202px"; //Eso lo hago aca por que me dio fiaca modificarlo del CSS y ademas como ejemplo de modificar el CSS con eventos.
+          botonAdd.innerHTML = "Agregado"
           totalCarrito()
         }
       }
@@ -201,11 +203,11 @@ function actualizarBotones(local) {
   }
 
 
-  // total carrito
+// Totales del carrito y contador superior
 
 function totalCarrito(){
     let totalPrecio = document.querySelector("#totalPrecio") 
-    let resPrecio = carrito.reduce((acumulador, actual) => acumulador + actual.value, 0); 
+    let resPrecio = carrito.reduce((acumulador, actual) => acumulador + actual.value, 0)
     totalPrecio.innerHTML = `<p> Precio Total:${resPrecio} </p>`
     
     let totalProductos = document.querySelector("#totalProductos")
@@ -219,15 +221,15 @@ function totalCarrito(){
 }
 
 
-//vaciar carrito
+// Vaciar carrito
 let vaciarCarrito = document.querySelector("#vaciarCarrito")
 vaciarCarrito.addEventListener('click',borrarCarrito)
 
 function borrarCarrito(){
     carrito = []
-    localStorage.setItem("Carrito", JSON.stringify(carrito)); // Actualizamos el local.
+    localStorage.setItem("Carrito", JSON.stringify(carrito))
     let carritoLocal = JSON.parse(localStorage.getItem("Carrito"))  
-    actualizarCarrito(carritoLocal);
+    actualizarCarrito(carritoLocal)
 
 }
 
